@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainTicket | Anti-Scalping Web3 NFT Ticketing</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-ticket">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+            <path d="M13 5v2"/>
+            <path d="M13 17v2"/>
+            <path d="M13 11v2"/>
+          </svg>
+        </div>
+        <div>
+          <h2>ChainTicket</h2>
+          <span class="tagline">ANTI-SCALPING EVENT PROTOCOL</span>
+        </div>
+      </div>
+
+      <div class="nav-stats">
+        <div class="stat-pill">
+          <span class="stat-label">GATE ADMISSIONS</span>
+          <span class="stat-val text-fuchsia" id="gateAdmissions">1 Check-in</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">ROYALTIES PAID</span>
+          <span class="stat-val" id="royaltiesPaid">0.024 ETH</span>
+        </div>
+        <button class="btn btn-primary" id="openCreateEventModal">+ Create Event</button>
+      </div>
+    </header>
+
+    <main class="main-container">
+      <div class="view-tabs">
+        <button class="view-tab active" data-view="events">🎪 Featured Events</button>
+        <button class="view-tab" data-view="my-tickets">🎟️ My Wallet Passes</button>
+        <button class="view-tab" data-view="gate">🛡️ Gate Scanner (Staff)</button>
+      </div>
+
+      <!-- VIEW 1: EVENTS -->
+      <section class="view-section active" id="viewEvents">
+        <div class="events-grid" id="eventsGrid">
+          <div class="loading-state">Loading on-chain events...</div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: MY TICKETS -->
+      <section class="view-section" id="viewMyTickets">
+        <div class="tickets-grid" id="myTicketsGrid">
+          <div class="loading-state">Loading your verifiable NFT passes...</div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: GATE SCANNER -->
+      <section class="view-section" id="viewGate">
+        <div class="scanner-card">
+          <div class="scanner-header">
+            <h3>Gate Admission Scanner</h3>
+            <p>Scan verifiable QR or enter Token ID to admit ticket holders at venue gates</p>
+          </div>
+          <form id="scannerForm" class="scanner-form">
+            <div class="field">
+              <label>Ticket Token ID *</label>
+              <input type="number" id="scanTokenId" required placeholder="e.g. 101">
+            </div>
+            <div class="field">
+              <label>QR Security Hash (Optional Verification)</label>
+              <input type="text" id="scanQrHash" placeholder="qr_...">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Verify & Admit Attendee</button>
+          </form>
+          <div id="scanResult" class="scan-result-box"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Create Event -->
+  <div class="modal-overlay" id="createEventModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Deploy New Event Smart Contract</h3>
+        <button class="btn-close" id="closeCreateBtn">&times;</button>
+      </div>
+      <form id="createEventForm">
+        <div class="field">
+          <label>Event Name *</label>
+          <input type="text" id="evName" required placeholder="e.g. DevCon World Summit 2027">
+        </div>
+        <div class="field">
+          <label>Venue / Location *</label>
+          <input type="text" id="evVenue" required placeholder="e.g. Moscone Center, San Francisco CA">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Face Value (ETH) *</label>
+            <input type="number" id="evFaceValue" required step="0.01" min="0.01" placeholder="0.10">
+          </div>
+          <div class="field">
+            <label>Max Resale Ceiling (ETH) *</label>
+            <input type="number" id="evMaxResale" required step="0.01" min="0.01" placeholder="0.12">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Organizer Royalty (%) *</label>
+            <input type="number" id="evRoyalty" required min="0" max="20" value="5">
+          </div>
+          <div class="field">
+            <label>Capacity *</label>
+            <input type="number" id="evCapacity" required min="1" value="1000">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelCreateBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Deploy Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Resell Ticket -->
+  <div class="modal-overlay" id="resellModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Secondary Resale (Anti-Scalping Enforced)</h3>
+        <button class="btn-close" id="closeResellBtn">&times;</button>
+      </div>
+      <form id="resellForm">
+        <input type="hidden" id="resellTokenId">
+        <div class="field">
+          <label>Recipient Ethereum Address *</label>
+          <input type="text" id="resellRecipient" required placeholder="0x...">
+        </div>
+        <div class="field">
+          <label>Recipient Name *</label>
+          <input type="text" id="resellName" required placeholder="e.g. Sarah Connor">
+        </div>
+        <div class="field">
+          <label>Resale Price (ETH) *</label>
+          <input type="number" id="resellPrice" required step="0.01" min="0.01">
+          <span class="field-hint" id="resellCapHint">Max allowed price: 0.18 ETH</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelResellBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Transfer Pass</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

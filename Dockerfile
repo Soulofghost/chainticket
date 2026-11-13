@@ -1,0 +1,15 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY backend/package*.json ./backend/
+RUN cd backend && npm install --omit=dev
+
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+COPY contracts/ ./contracts/
+
+ENV PORT=4025
+EXPOSE 4025
+
+CMD ["node", "backend/src/server.js"]

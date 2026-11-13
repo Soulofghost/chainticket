@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  chainticket:
+    build: .
+    ports:
+      - "4025:4025"
+    environment:
+      - NODE_ENV=production
+      - PORT=4025
+    volumes:
+      - chainticket_data:/app/backend/data
+    restart: unless-stopped
+
+volumes:
+  chainticket_data:
